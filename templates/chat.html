@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+   <link href="../static/bootstrap.min.css" rel="stylesheet" />
+    <link href="../static/style.css" rel="stylesheet" />
+<style type="text/css">
+  .ch {
+  width: 700px;
+  height: 700px;
+  padding: 100px;
+  border: 5px solid gray;
+  margin: 0;
+}
+
+form{
+  padding: 50px;
+  border: 1px solid gray;
+  margin: 50px
+}
+
+</style>
+
+</head>
+<body>
+  <h1>Room Number : {{session['room']}}</h1>
+  <form id="form">
+    <div class="form-group">
+    <label for="exampleInputEmail1">Enter the message</label>
+  
+    <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+  
+    <input type="text" class="form-control" id="input" placeholder="enter" aria-describedby="emailHelp">
+    <br>
+    <br>
+    
+    <input type="file" id="image"  name="file" class="btn btn-primary">
+
+    <br>
+    <br>
+    <button type="submit" class="btn btn-primary">Send message</button>
+    </div>
+  </form>
+  <button type="button" class="btn btn-danger" onclick=leave_room()>Leave this Chat</button>
+  <br>
+    <div class="ch">
+      <ul id="messages" >
+      
+      </ul>
+    </div>
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+<script type="text/javascript">
+  
+  let socket 
+  socket = io()
+
+let form = document.getElementById('form')
+let input = document.getElementById('input')
+
+let imageInput = document.getElementById('image')
+
+form.addEventListener('submit',(event) =>{
+
+  event.preventDefault()
+  let message = input.value
+  socket.emit('message',message)
+  input.value = ""
+
+})
+
+imageInput.addEventListener('change',(e) =>{
+  let file = imageInput.files[0]
+  let reader = new FileReader()
+  reader.addEventListener('load',() =>{
+    socket.emit('image',reader.result)
+  })
+  reader.readAsDataURL(file)
+})
+
+socket.on('message',(message) =>{
+  let li = document.createElement('li')
+  li.textContent = message
+  document.getElementById('messages').prepend(li)
+})
+
+socket.on('image',(image_data) =>
+{
+  let li = document.createElement('li')
+  let img = document.createElement('img')
+  img.src = image_data
+  img.widht = 300
+  img.height = 300
+  console.log(img)
+  li.appendChild(img)
+  document.getElementById('messages').prepend(li)
+
+})
+function leave_room() {
+                
+                    // go back to the login page
+                    window.location.href = "{{ url_for('index') }}";
+                
+            }
+
+</script>
+</html>
